@@ -1,12 +1,5 @@
 #' use SCimpute to impute dropout values in scRNA-seq data
 #'
-#' @param count_path A character specifying the full path of the raw count matrix;
-#' @param infile A character specifying the type of file storing the raw count matrix;
-#' can be either "csv" or "txt". The input file shoule have rows representing genes and
-#' columns representing cells, with its first row as cell names 
-#' and first column as gene names.
-#' @param outfile A character specifying the type of file storing the imputed count matrix;
-#' can be either "csv" or "txt".
 #' @param out_dir A character specifying the full path of the output directory, 
 #' which is used to store all intermdediate and final outputs.
 #' @param drop_thre A number between 0 and 1, 
@@ -25,15 +18,16 @@
 #' @import stats
 #' @import utils
 scimpute <-
-function (count_path, infile = "csv", outfile = "csv", out_dir, 
-    drop_thre = 0.5, celltype = FALSE, labels = NULL, ncores = 5) 
-{   
+function (raw_count, drop_thre = 0.5, celltype = FALSE, labels = NULL, ncores = 5) 
+{
+    out_dir <- paste0(tempdir(),"/")
+    
     if(celltype == TRUE & is.null(labels)){
       print("'labels' must be specified when 'celltype = TRUE'!"); stop()
     }
     # print(drop_thre)
     print("reading in raw count matrix ...")
-    count_lnorm = read_count(filetype = infile, path = count_path, out_dir = out_dir)
+    count_lnorm = read_count(raw_count = raw_count, out_dir = out_dir)
     genenames = rownames(count_lnorm)
     cellnames = colnames(count_lnorm)
     print("estimating mixture models ...")
@@ -53,21 +47,13 @@ function (count_path, infile = "csv", outfile = "csv", out_dir,
     rownames(count_imp) = genenames
     colnames(count_imp) = cellnames
     print("writing imputed count matrix ...")
-    write_count(count_imp, filetype = outfile, out_dir)
-    return(0)
+    return(write_count(count_imp, out_dir = out_dir))
 }
 
 
 
 #' quick re-run of SCimpute with a different \code{drop_thre}
 #'
-#' @param count_path A character specifying the full path of the raw count matrix;
-#' @param infile A character specifying the type of file storing the raw count matrix;
-#' can be either "csv" or "txt". The input file shoule have rows representing genes and
-#' columns representing cells, with its first row as cell names 
-#' and first column as gene names.
-#' @param outfile A character specifying the type of file storing the imputed count matrix;
-#' can be either "csv" or "txt".
 #' @param out_dir A character specifying the full path of the output directory, 
 #' which is used to store all intermdediate and final outputs.
 #' @param drop_thre A number between 0 and 1, 
@@ -86,15 +72,16 @@ function (count_path, infile = "csv", outfile = "csv", out_dir,
 #' @import stats
 #' @import utils
 scimpute_quick <-
-  function (count_path, infile = "csv", outfile = "csv", out_dir, 
-            drop_thre = 0.5, celltype = FALSE, labels = NULL, ncores = 5) 
+  function (raw_count, drop_thre = 0.5, celltype = FALSE, labels = NULL, ncores = 5) 
   {
+    out_dir <- paste0(tempdir(),"/")
+      
     if(celltype == TRUE & is.null(labels)){
       print("'labels' must be specified when 'celltype = TRUE'!"); stop()
     }
     # print(drop_thre)
     print("reading in raw count matrix ...")
-    count_lnorm = read_count(filetype = infile, path = count_path, out_dir = out_dir)
+    count_lnorm = read_count(raw_count = raw_count, out_dir = out_dir)
     genenames = rownames(count_lnorm)
     cellnames = colnames(count_lnorm)
     parslist = readRDS(paste0(out_dir, "parslist.rds"))
@@ -110,6 +97,5 @@ scimpute_quick <-
     rownames(count_imp) = genenames
     colnames(count_imp) = cellnames
     print("writing imputed count matrix ...")
-    write_count(count_imp, filetype = outfile, out_dir)
-    return(0)
+    return(write_count(count_imp, out_dir = out_dir))
   }

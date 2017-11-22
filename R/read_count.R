@@ -1,16 +1,6 @@
 read_count <-
-function (filetype, path, out_dir) 
+function (raw_count = raw_count, out_dir = out_dir) 
 {
-    if (filetype == "csv") {
-        raw_count = read.csv(path, header = TRUE, row.names = 1)
-    }
-    else if (filetype == "txt") {
-        raw_count = read.table(path, header = TRUE, row.names = 1)
-    }
-    else {
-        print("filetype can be either 'csv' or 'txt'!")
-        stop()
-    }
     raw_count = as.matrix(raw_count)
     totalCounts_by_cell = colSums(raw_count)
     saveRDS(totalCounts_by_cell, file = paste0(out_dir, "totalCounts_by_cell.rds"))
